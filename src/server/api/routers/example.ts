@@ -5,6 +5,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { db } from "~/server/db";
 
 export const exampleRouter = createTRPCRouter({
   hello: publicProcedure
@@ -15,11 +16,33 @@ export const exampleRouter = createTRPCRouter({
       };
     }),
 
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.db.example.findMany();
+  // getAll: publicProcedure.query(({ ctx }) => {
+  //   return ctx.db.example.findMany();
+  // }),
+
+  // getSecretMessage: protectedProcedure.query(() => {
+  //   return "you can now see this secret message!";
+  // }),
+
+  getAllBlogs: publicProcedure.query(() => {
+    return db.post.findMany();
   }),
 
-  getSecretMessage: protectedProcedure.query(() => {
-    return "you can now see this secret message!";
-  }),
+  postBlog: publicProcedure
+    .input(z.object({ title: z.string(), description: z.string() }))
+    .mutation((req) => {
+      const postBlog = db.post.create({
+        data: {
+          title: req.input.title,
+          description: req.input.description,
+        },
+      });
+      return postBlog;
+    }),
+
+  getDetailBlog: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query((req) => {
+      return db.post.findUnique({ where: { id: req.input.id } });
+    }),
 });
