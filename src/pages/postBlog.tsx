@@ -8,7 +8,12 @@ const PostBlog = () => {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   // const [title, setTitle] = useState<string>("");
   // const [description, setDescription] = useState<string>("");
-  const postBlog = api.example.postBlog.useMutation();
+  const allBlogs = api.example.getAllBlogs.useQuery();
+  const postBlog = api.example.postBlog.useMutation({
+    onSettled: () => {
+      void allBlogs.refetch();
+    },
+  });
   const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -22,7 +27,6 @@ const PostBlog = () => {
       });
     }
 
-    // router.refresh();
     router.push("/");
   };
 
